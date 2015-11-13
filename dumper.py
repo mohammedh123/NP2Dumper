@@ -1,8 +1,9 @@
-import requests
+import getopt
 import json
-import time
-import sys
 import os
+import requests
+import sys
+import time
 
 # Returns log in responses' cookies
 def log_in(username, password):
@@ -49,22 +50,73 @@ def dump_file(state_json_str):
         dump_file.write(state_json_str)
 
     print "Finished taking dump."
+    
+def print_usage():
+    print "Usage: python {0} -u username -p password -g game_number [-t refresh_interval]".format(sys.argv[0])
+    print "Note:  refresh interval is measured in seconds and defaults to 60"
 
+def parse_args(args):
+    dic = {}
+    
+    if (len(args) == 0):
+        return dic
+    
+    opts = getopt.getopt(args, 'hu:p:g:t:')
+    
+    for o,a in opts[0]:
+        if o == '-h':
+            dic['help'] = True
+            break
+        elif o == '-u':
+            dic['username'] = a
+        elif o == '-p':
+            dic['password'] = a
+        elif o == '-g':
+            dic['game_number'] = a
+        elif o == '-t':
+            dic['refresh_interval'] = a
+    
+    return dic
 
-if len(sys.argv) < 5:
-    print "Usage: python dumper.py username password refresh_seconds game_number"
-    sys.exit(1)
+def validate_args(dic):
+    if 'help' in dic:
+        print_usage()
+        sys.exit(0)
+    
+    if 'username' not in dic or dic['username']=='':
+        print "Error: username was not specified; exiting..."
+        print_usage()
+        sys.exit(1)
+    
+    if 'password' not in dic or dic['password']=='':
+        print "Error: password was not specified; exiting..."
+        print_usage()
+        sys.exit(1)
+    
+    if 'game_number' not in dic or dic['game_number']=='':
+        print "Error: game number was not specified; exiting..."
+        print_usage()
+        sys.exit(1)
+    
+    if 'refresh_interval' not in dic or dic['refresh_interval']=='':
+        dri = 60 # default refresh interval
+        dic['refresh_interval'] = dri
+        print "Info:  refresh interval was not specified; defaulting to {0} seconds...".format(dri)
 
-username = sys.argv[1]
-password = sys.argv[2]
-refresh_seconds = sys.argv[3]
-game_number = sys.argv[4]
+def main():
+    args = [] if len(sys.argv)==1 else sys.argv[1:]
+    dic = parse_args(args)
+    validate_args(dic)
 
-cookies = log_in(username, password)
+    cookies = log_in(dic['username'], dic['password'])
+    refresh_interval = dic['refresh_interval']
 
-while True:
-    state = get_game_state(cookies, game_number)
-    dump_file(state)
+    while True:
+        state = get_game_state(cookies, dic['game_number'])
+        dump_file(state)
 
-    print "Waiting {0} seconds until next bowel movement...".format(refresh_seconds)
-    time.sleep(float(refresh_seconds))
+        print "Waiting {0} seconds until next bowel movement...".format(refresh_interval)
+        time.sleep(float(refresh_interval))
+
+if __name__ == '__main__':
+    main()

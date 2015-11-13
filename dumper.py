@@ -5,7 +5,8 @@ import requests
 import sys
 import time
 
-# Returns log in responses' cookies
+
+# Returns login response's cookies
 def log_in(username, password):
     print "Preparing to take a dump by logging in..."
 
@@ -50,10 +51,12 @@ def dump_file(state_json_str):
         dump_file.write(state_json_str)
 
     print "Finished taking dump."
-    
+
+
 def print_usage():
     print "Usage: python {0} -u username -p password -g game_number [-t refresh_interval]".format(sys.argv[0])
     print "Note:  refresh interval is measured in seconds and defaults to 60"
+
 
 def parse_args(args):
     dic = {}
@@ -77,6 +80,7 @@ def parse_args(args):
             dic['refresh_interval'] = a
     
     return dic
+
 
 def validate_args(dic):
     if 'help' in dic:
@@ -103,6 +107,7 @@ def validate_args(dic):
         dic['refresh_interval'] = dri
         print "Info:  refresh interval was not specified; defaulting to {0} seconds...".format(dri)
 
+
 def main():
     args = [] if len(sys.argv)==1 else sys.argv[1:]
     dic = parse_args(args)
@@ -117,6 +122,7 @@ def main():
 
         print "Waiting {0} seconds until next bowel movement...".format(refresh_interval)
         time.sleep(float(refresh_interval))
+
 
 if __name__ == '__main__':
     main()

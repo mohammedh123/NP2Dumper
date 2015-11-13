@@ -41,7 +41,7 @@ def dump_file(state_json_str):
     tick = state_json['report']['tick']
     player = state_json['report']['player_uid']
 
-    filename = "gamestate_{0:02d}_{0:08d}.json".format(player, tick)
+    filename = "gamestate_{0:02d}_{1:08d}.json".format(player, tick)
     print "Taking a dump on {}/{}...".format('dumps', filename)
 
     if not os.path.exists('dumps'):

@@ -37,12 +37,12 @@ def get_game_state(cookies, game_number):
     return get_state_resp.text
 
 
-def dump_file(state_json_str):
+def dump_file(state_json_str, game_number):
     state_json = json.loads(state_json_str)
     tick = state_json['report']['tick']
     player = state_json['report']['player_uid']
 
-    filename = "gamestate_{0:02d}_{1:08d}.json".format(player, tick)
+    filename = "gamestate_{0}_{1:02d}_{2:08d}.json".format(game_number, player, tick)
     print "Taking a dump on {}/{}...".format('dumps', filename)
 
     if not os.path.exists('dumps'):
@@ -140,7 +140,7 @@ def main():
 
     while True:
         state = get_game_state(cookies, dic['game_number'])
-        dump_file(state)
+        dump_file(state, dic['game_number'])
 
         print "Waiting {0} seconds until next bowel movement...".format(refresh_interval)
         time.sleep(float(refresh_interval))

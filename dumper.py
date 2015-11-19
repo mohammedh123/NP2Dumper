@@ -37,23 +37,55 @@ def get_game_state(cookies, game_number):
     return get_state_resp.text
 
 
-def dump_file(state_json_str, game_number):
+def get_intel_data(cookies, game_number):
+    print "Getting intel data to dump..."
+    
+    get_intel_data = { "type": "intel_data", "version": "7", "game_number": game_number}
+    get_intel_resp = requests.post("http://np.ironhelmet.com/grequest/intel_data", data=get_intel_data, cookies=cookies)
+    
+    if get_intel_resp.status_code != 200:
+        print "Failed to get intel data. Bother Mohammed, but not until the game is over."
+        sys.exit(1)
+    
+    print "Intel data received!"
+    return get_intel_resp.text
+
+
+def dump_state_file(state_json_str, game_number):
     state_json = json.loads(state_json_str)
     tick = state_json['report']['tick']
     player = state_json['report']['player_uid']
 
-    filename = "gamestate_{0}_{1:02d}_{2:08d}.json".format(game_number, player, tick)
-    print "Taking a dump on {}/{}...".format('dumps', filename)
+    dir = 'dumps'
+    filename = "{0}/gamestate_{1}_{2:02d}_{3:08d}.json".format(dir, game_number, player, tick)
+    print "Taking a dump on {0}...".format(filename)
 
-    if not os.path.exists('dumps'):
-        os.makedirs('dumps')
+    if not os.path.exists(dir):
+        os.makedirs(dir)
 
-    with open('dumps/' + filename, 'w') as dump_file:
-        dump_file.write(state_json_str)
+    with open(filename, 'w') as dump_file:
+        prettified = json.dumps(state_json, indent=4, separators=(',', ': '))
+        dump_file.write(prettified)
 
     print "Finished taking dump."
 
 
+def dump_intel_file(intel_json_str, game_number):
+    dir = 'dumps'
+    filename = "{0}/intel_{1}.json".format(dir, game_number)
+    print "Dumping intel in {0}...".format(filename)
+    
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
+    with open(filename, 'w') as dump_file:
+        intel_json = json.loads(intel_json_str)
+        prettified = json.dumps(intel_json, indent=4, separators=(',', ': '))
+        dump_file.write(prettified)
+
+    print "Finished taking intel dump."
+    
+    
 def print_usage():
     script_name = sys.argv[0]
     print "Usage 1: python {0} [-c config_file.ini]".format(script_name)
@@ -140,7 +172,10 @@ def main():
 
     while True:
         state = get_game_state(cookies, dic['game_number'])
-        dump_file(state, dic['game_number'])
+        dump_state_file(state, dic['game_number'])
+        
+        intel = get_intel_data(cookies, dic['game_number'])
+        dump_intel_file(intel, dic['game_number'])
 
         print "Waiting {0} seconds until next bowel movement...".format(refresh_interval)
         time.sleep(float(refresh_interval))

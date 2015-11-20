@@ -171,11 +171,14 @@ def main():
     refresh_interval = dic['refresh_interval']
 
     while True:
-        state = get_game_state(cookies, dic['game_number'])
-        dump_state_file(state, dic['game_number'])
-        
-        intel = get_intel_data(cookies, dic['game_number'])
-        dump_intel_file(intel, dic['game_number'])
+        try:
+            state = get_game_state(cookies, dic['game_number'])
+            dump_state_file(state, dic['game_number'])
+            
+            intel = get_intel_data(cookies, dic['game_number'])
+            dump_intel_file(intel, dic['game_number'])
+        except ValueError:
+            print "ValueError was caught; ignoring..."
 
         print "Waiting {0} seconds until next bowel movement...".format(refresh_interval)
         time.sleep(float(refresh_interval))

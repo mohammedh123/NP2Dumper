@@ -177,8 +177,8 @@ def main():
             
             intel = get_intel_data(cookies, dic['game_number'])
             dump_intel_file(intel, dic['game_number'])
-        except ValueError:
-            print "ValueError was caught; ignoring..."
+        except:
+            print "Whatever, an error occurred; ignoring..."
 
         print "Waiting {0} seconds until next bowel movement...".format(refresh_interval)
         time.sleep(float(refresh_interval))
